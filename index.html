@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>TimeRec</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <span>Verbinde mit Airtable…</span>
+</div>
+
+<!-- ERROR -->
+<div id="error-screen"></div>
+
+<!-- APP -->
+<div id="app">
+
+  <header class="app-header">
+    <span class="app-title">TimeRec</span>
+    <span id="offline-indicator" class="offline-indicator"></span>
+  </header>
+
+  <!-- ── HEUTE ──────────────────────────────────────────── -->
+  <div id="page-today" style="display:none">
+    <div class="page-content">
+      <div id="today-date"></div>
+      <div id="today-running"></div>
+
+      <div class="punch-area">
+        <button id="punch-btn" class="punch-btn punch-in">KOMMT</button>
+        <div id="punch-status"></div>
+        <button id="break-modal-btn" class="break-modal-btn">⏸ Pause</button>
+        <select id="task-select"></select>
+      </div>
+
+      <div id="today-progress">
+        <div>
+          <div class="progress-label">Ist</div>
+          <div class="progress-value" id="progress-ist">—</div>
+        </div>
+        <div>
+          <div class="progress-label">Soll</div>
+          <div class="progress-value" id="progress-soll">—</div>
+        </div>
+        <div>
+          <div class="progress-label">Delta</div>
+          <div class="progress-value progress-delta" id="progress-delta">—</div>
+        </div>
+      </div>
+
+      <div class="section-title">Heutige Einträge</div>
+      <div id="stamp-list"></div>
+    </div>
+  </div>
+
+  <!-- ── WOCHE ──────────────────────────────────────────── -->
+  <div id="page-week" style="display:none">
+    <div class="page-content">
+      <div class="page-nav">
+        <button class="page-nav-btn" id="week-prev">‹</button>
+        <div>
+          <div class="page-nav-title" id="week-title"></div>
+          <a class="page-nav-today" id="week-today-link" style="display:none">heute</a>
+        </div>
+        <button class="page-nav-btn" id="week-next">›</button>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Tag</th>
+            <th>Ist</th>
+            <th>Soll</th>
+            <th>Delta</th>
+          </tr>
+        </thead>
+        <tbody id="week-tbody"></tbody>
+        <tfoot>
+          <tr id="week-total"></tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── MONAT ──────────────────────────────────────────── -->
+  <div id="page-month" style="display:none">
+    <div class="page-content">
+      <div class="page-nav">
+        <button class="page-nav-btn" id="month-prev">‹</button>
+        <div>
+          <div class="page-nav-title" id="month-title"></div>
+          <a class="page-nav-today" id="month-today-link" style="display:none">heute</a>
+        </div>
+        <button class="page-nav-btn" id="month-next">›</button>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>KW</th>
+            <th>Zeitraum</th>
+            <th>Ist</th>
+            <th>Soll</th>
+            <th>Delta</th>
+          </tr>
+        </thead>
+        <tbody id="month-tbody"></tbody>
+        <tfoot>
+          <tr id="month-total"></tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── VERLAUF ────────────────────────────────────────── -->
+  <div id="page-history" style="display:none">
+    <div class="page-content">
+      <div class="page-nav">
+        <button class="page-nav-btn" id="history-prev">‹</button>
+        <div>
+          <div class="page-nav-title" id="history-date"></div>
+          <a class="page-nav-today" id="history-today-link" style="display:none">heute</a>
+        </div>
+        <button class="page-nav-btn" id="history-next">›</button>
+      </div>
+
+      <div id="history-stats" class="history-stats">
+        <div class="history-stat">
+          <div class="label">Ist</div>
+          <div class="value" id="history-ist">—</div>
+        </div>
+        <div class="history-stat">
+          <div class="label">Soll</div>
+          <div class="value" id="history-soll">—</div>
+        </div>
+        <div class="history-stat">
+          <div class="label">Delta</div>
+          <div class="value history-delta-val" id="history-delta">—</div>
+        </div>
+      </div>
+
+      <div class="section-title">Stempel</div>
+      <div id="history-stamp-list"></div>
+
+      <div class="section-title">Notiz</div>
+      <textarea id="history-note" placeholder="Notiz für diesen Tag…"></textarea>
+
+      <div id="history-absence" style="display:none">
+        <div class="section-title">Abwesenheit</div>
+        <div class="absence-buttons">
+          <button class="btn-secondary" id="btn-urlaub">🏖 Urlaub</button>
+          <button class="btn-secondary" id="btn-feiertag">🎉 Feiertag</button>
+          <button class="btn-secondary" id="btn-kompensation">↔ Kompensation</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── EINSTELLUNGEN ──────────────────────────────────── -->
+  <div id="page-settings" style="display:none">
+    <div class="page-content">
+
+      <div class="settings-section">
+        <h3>Sollzeit pro Wochentag</h3>
+        <div id="settings-schedule"></div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Auto-Pausen</h3>
+        <div id="settings-autobreaks"></div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Auto-Ausstempeln</h3>
+        <div id="settings-autopunchout"></div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Pausenvorlagen</h3>
+        <div id="settings-break-templates"></div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Zeitformat</h3>
+        <div id="settings-timeformat" style="display:flex; flex-wrap:wrap; gap:4px; padding-top:4px;"></div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Aufgaben</h3>
+        <div id="settings-tasks"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── BOTTOM NAV ─────────────────────────────────────── -->
+  <nav class="bottom-nav">
+    <button class="nav-tab active" data-page="today">
+      <span class="icon">⏱</span>
+      <span>Heute</span>
+    </button>
+    <button class="nav-tab" data-page="week">
+      <span class="icon">📅</span>
+      <span>Woche</span>
+    </button>
+    <button class="nav-tab" data-page="month">
+      <span class="icon">📊</span>
+      <span>Monat</span>
+    </button>
+    <button class="nav-tab" data-page="history">
+      <span class="icon">📋</span>
+      <span>Verlauf</span>
+    </button>
+    <button class="nav-tab" data-page="settings">
+      <span class="icon">⚙️</span>
+      <span>Einstellungen</span>
+    </button>
+  </nav>
+
+  <!-- ── PAUSE MODAL ────────────────────────────────────── -->
+  <div id="break-modal" class="modal">
+    <div id="break-modal-content" class="modal-content"></div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<!-- SCRIPTS (Reihenfolge wichtig) -->
+<script src="config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/calc.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/pages/today.js"></script>
+<script src="js/pages/week.js"></script>
+<script src="js/pages/month.js"></script>
+<script src="js/pages/history.js"></script>
+<script src="js/pages/settings.js"></script>
+<script src="js/ui.js"></script>
+
+</body>
+</html>
